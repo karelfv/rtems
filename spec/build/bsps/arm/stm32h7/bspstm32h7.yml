@@ -13,5 +13,9 @@ install: []
 links:
 - role: build-dependency
   uid: grp
-source: []
+source:
+- bsps/arm/stm32h7/boards/stm/stm32h743i-eval/stm32h7-config-clk.c
+- bsps/arm/stm32h7/boards/stm/stm32h743i-eval/stm32h7-config-osc.c
+- bsps/arm/stm32h7/boards/stm/stm32h743i-eval/stm32h7-config-per.c
+- bsps/arm/stm32h7/boards/stm/stm32h743i-eval/system_stm32h7xx.c
 type: build

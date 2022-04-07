@@ -99,7 +99,11 @@ void bsp_start_hook_0(void)
     init_peripheral_clocks();
     HAL_RCC_MCOConfig(RCC_MCO1, RCC_MCO1SOURCE_HSI, RCC_MCODIV_1);
     HAL_Init();
+#if defined(STM32H743xx) && defined(STM32H7_HSE_FREQUENCY) && STM32H7_HSE_FREQUENCY != 8000000
+    /* above is a way how to distinguish between h743i-eval and nucleo-h743zi before
+       we come with proper define/parameter for external S(D)RAM */
     SystemInit_ExtMemCtl();
+#endif
   }
 
   if ((SCB->CCR & SCB_CCR_IC_Msk) == 0) {
