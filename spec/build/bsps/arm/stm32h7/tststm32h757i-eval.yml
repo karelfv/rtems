@@ -1,0 +1,35 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+actions:
+- set-test-state:
+    linpack: exclude
+    fsdosfsname01: exclude
+    record02: exclude
+# just for sram+sdram
+    rcxx01: exclude
+    utf8proc01: exclude
+    fileio: exclude
+    iostream: exclude
+# just for srams
+    fsjffs2gc01: exclude
+    sp71: exclude
+    tm21: exclude
+    tm29: exclude
+    tsunitnoclock0: exclude
+build-type: option
+copyrights:
+- Copyright (C) 2020 embedded brains GmbH (http://www.embedded-brains.de)
+default: null
+default-by-variant: []
+description: ''
+enabled-by: true
+links:
+- role: build-dependency
+  uid: ../../tstnoiconv
+- role: build-dependency
+  uid: ../../tstnolibdl
+# just for srams
+- role: build-dependency
+  uid: ../../tstnojffs2
+- role: build-dependency
+  uid: ../../tstsmallmem
+type: build

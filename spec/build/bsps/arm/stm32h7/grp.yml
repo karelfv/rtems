@@ -84,6 +84,8 @@ links:
 - role: build-dependency
   uid: optpwrsupply
 - role: build-dependency
+  uid: optbootcore
+- role: build-dependency
   uid: optusart1gpiopins
 - role: build-dependency
   uid: optusart1gpioregs
@@ -115,6 +117,10 @@ links:
   uid: linkcmds
 - role: build-dependency
   uid: linkcmdssdram
+- role: build-dependency
+  uid: linkcmdssram
+- role: build-dependency
+  uid: linkcmdssramsdram
 - role: build-dependency
   uid: ../../bspopts
 type: build
