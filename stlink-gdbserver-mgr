@@ -1,0 +1,37 @@
+#!/bin/sh
+echo "STLink GDB server manager started."
+START_FILE="/tmp/stlink-start"
+STOP_FILE="/tmp/stlink-stop"
+PLUGIN_DIR=$HOME/sfw/stm32cubeide_1.8.0/plugins/com.st.stm32cube.ide.mcu.externaltools.stlink-gdb-server.linux64_2.0.200.202202231230/tools/bin
+
+while (true)
+do
+	while ([ ! -f $START_FILE ])
+	do
+		echo "polling for start file..."
+		sleep 1
+ 	done
+	echo "starting ST link gdb server..."
+        $PLUGIN_DIR/ST-LINK_gdbserver -c $PLUGIN_DIR/config-rtems-tester.txt &
+	stlink_pid=$!
+	echo "done, pid: " $stlink_pid
+	echo "Waiting for proper init..."
+	sleep 5
+	echo "Signaling startup..."
+	rm $START_FILE
+
+	while ([ ! -f $STOP_FILE ])
+	do
+		echo "polling for stop file..."
+		sleep 1
+ 	done
+	echo "Killing ST link gdb server..."
+        kill $stlink_pid
+        sleep 5
+	# sometimes gdb server will hang, let's try to kill hard
+	kill -9 $stlink_pid 2>/dev/null
+	sleep 1
+	echo "Signaling finish..."
+	rm $STOP_FILE
+done
+        	

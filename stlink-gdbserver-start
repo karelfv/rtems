@@ -1,0 +1,8 @@
+#!/bin/sh
+START_FILE="/tmp/stlink-start"
+touch $START_FILE
+while ([ -f $START_FILE ])
+do
+	echo "Waiting for ST link gdb server startup..."
+	sleep 1
+done

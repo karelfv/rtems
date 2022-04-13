@@ -1,0 +1,5 @@
+[stm32h7-stlink]
+bsp_tty_dev = 127.0.0.1:3033
+target_pretest_command = /home/karel/sfw/rtems/6-tools-2022-01-23/bin/stlink-gdbserver-start
+target_posttest_command = /home/karel/sfw/rtems/6-tools-2022-01-23/bin/stlink-gdbserver-stop
+

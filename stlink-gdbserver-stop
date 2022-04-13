@@ -1,0 +1,8 @@
+#!/bin/sh
+STOP_FILE="/tmp/stlink-stop"
+touch $STOP_FILE
+while ([ -f $STOP_FILE ])
+do
+	echo "Waiting for ST link gdb server finish..."
+	sleep 1
+done
