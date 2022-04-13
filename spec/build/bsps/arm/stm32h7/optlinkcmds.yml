@@ -10,6 +10,7 @@ default-by-variant:
 - value: linkcmds.sram+sdram
   variants:
   - arm/stm32h757i-eval
+  - arm/stm32h747i-disco
 enabled-by: true
 format: '{}'
 links: []

@@ -20,6 +20,9 @@ default-by-variant:
 - value: STM32H757xx
   variants:
     - arm/stm32h757i-eval
+- value: STM32H747xx
+  variants:
+  - arm/stm32h747i-disco
 enabled-by: true
 format: '{}'
 links: []
