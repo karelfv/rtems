@@ -1,0 +1,751 @@
+== RTEMS for STM32H747I-DISCO board HOWTO
+
+This document briefly describes what is needed in order to make
+RTEMS development branch code working on STM32H747I-DISCO board.
+
+=== Preparations
+
+* Purchase and connect STM32H747I-DISCO board to your host computer
+
+* Download and install necessary software
+
+* Prepare board for running RTEMS
+
+* Install RTEMS build requirements
+
+==== Board hardware setup
+Take the board from its cover and turn it by display down. On the bottom
+of the board look for micro-USB connector which is nearest to the RCA
+and ETH connectors. It is marked 'ST-LINK V3E'. Plug micro-USB cable
+into this port and other side of the cable plug into your host computer. If your
+host computer is running, the board should start. There are quite some
+demos preloaded on the board showing capabilities of the board and 3
+bundled runtime UI libraries. If you got board running, you are done
+with this step.
+
+==== STM32CubeIDE installation
+Download and install STM32CubeIDE from
+https://www.st.com/en/development-tools/stm32cubeide.html. Install the
+software into the user directory. On Linux install with 'sudo' command
+to install as a root since as part of the installation USB permissions
+rules for ST-Link GDB server are also installed. The reason for
+installing into the user directory is that the IDE is based on
+Eclipse, which provides
+its own update method and this will not work well in case of read-only
+access to the installation. In case of any troubles consult
+installation manual provided by ST here https://www.st.com/resource/en/user_manual/um2563-stm32cubeide-installation-guide-stmicroelectronics.pdf.
+For RTEMS we will use only small part of the package which is ST-Link GDB Server for uploading RTEMS binaries to the board
+memory.
+
+CAUTION: Cedric, I've installed my copy of STM32CubeIDE in January
+this year. I do not really remember all the details and I'm not able
+to quickly reinstall whole machine in order to get it back to clean
+state. So the information above may be a bit on the water, but they
+are provided in the best way I'm able to remember and verify from
+available documentation.
+
+==== STMCubeProgrammer installation
+Download and install STMCubeProgrammer from
+https://www.st.com/en/development-tools/stm32cubeprog.html. We will
+use this software for board setup required for RTEMS and later when
+something goes wrong to delete content of the board flash memory. The
+software is also internally used by the ST-Link GDB Server from
+STM32CubeIDE so it is crucial to have it installed.
+
+
+==== Board ST-Link firmware upgrade
+Download ST-Link board firmware upgrade package from
+https://www.st.com/en/development-tools/stsw-link007.html. The
+software is distributed in a form of Java jar file for Linux and Mac
+OSX and in a form of Windows binary for MS Windows. Unpack it
+somewhere and run it with:
+
+----
+$ unzip en.stsw-link007-v3-9-3_v3.9.3.zip
+$ cd stsw-link007/AllPlatforms
+$ java -jar STLinkUpgrade.jar
+----
+Click on 'Open in update mode' button and then if 'Version' and 'Update
+to Firmware' version information are different in shown version number/code, click on 'Upgrade'
+button and wait till upgrade finishes.
+
+IMPORTANT: On Linux you will need to have libusb library installed in
+order to make upgrade process working. On Ubuntu 20.04 LTS you can do
+that with following command.
+----
+sudo apt install libusb-1.0-0
+----
+
+
+==== Board setup for RTEMS
+Current RTEMS board support package for STM32H747I-DISCO board supports
+running MCU in a single-core mode only with M7 core running and M4 core
+switched off. The board by default switches on and boots both cores so
+we need to switch M4 core off. This is done using STMCubeProgrammer tool.
+Go to the directory where you have installed STMCubeProgrammer
+software and run it with
+----
+$ cd bin
+$ ./STM32CubeProgrammer
+----
+IMPORTANT: It is absolutely necessary you will do that from inside the bin
+directory where STM32CubeProgrammer binary resides. If you don't, then
+programmer UI will crash on attempt to connect to the board. Probably
+reason is a bug in the programmer which is not able to correctly locate
+its C dynamic library responsible for connecting to the ST-Link board
+interface.
+
+When you start the programmer application, the UI window of the programmer will
+appear.
+
+Click on green 'Connect' button in the right upper corner of
+the UI. This will connect programmer to the board.
+
+Then click on 'OB'
+icon in the left upper corner. Actually this is hidden menu item which you
+can un-hide by clicking on menu icon (three horizontal stripes) in the
+upper left corner.
+When you click on 'OB' or 'Option bytes' in un-hidden state, then
+click on 'User Configuration' in the options list and when the user
+configuration list opens
+unselect preselected 'BCM4' item inside it. This disables M4 core from
+booting. The action needs to be saved by clicking on 'Apply' button
+below the option table.
+
+Do not forget to disconnect the programmer application from the board by clicking on green 'Disconnect' button
+in the upper right corner and then close the programmer UI.
+
+IMPORTANT: If you keep programmer connected then you will not be able
+to connect ST-Link GDB server to the board and upload RTEMS binary to
+it.
+
+==== STM32CubeIDE ST-Link GDB Server setup
+In order to use STM provided ST-Link GDB server externally, that is
+not from inside the IDE, we need to configure it. Please go to the
+directory where you have installed STM32CubeIDE software. Look for
+file containing 'ST-LINK' string inside its name. Following shell
+command sequence shows example.
+----
+$ cd $HOME/sfw/stm32cubeide_1.8.0
+$ find . -name 'ST-LINK*'
+./plugins/com.st.stm32cube.ide.mcu.externaltools.stlink-gdb-server.linux64_2.0.200.202202231230/tools/bin/ST-LINK_gdbserver.sh
+./plugins/com.st.stm32cube.ide.mcu.externaltools.stlink-gdb-server.linux64_2.0.200.202202231230/tools/bin/ST-LINK_gdbserver
+./plugins/com.st.stm32cube.ide.mcu.externaltools.stlink-gdb-server.linux64_2.0.100.202109301221/tools/bin/ST-LINK_gdbserver.sh
+./plugins/com.st.stm32cube.ide.mcu.externaltools.stlink-gdb-server.linux64_2.0.100.202109301221/tools/bin/ST-LINK_gdbserver
+----
+Notice that in this particular installation case we already have two
+versions of GDB server installed. This is due to fact that version
+1.8.0 of the IDE was upgraded to 1.9.0 version. Anyway, we will choose
+to use the latest one, or if there is only one, then the only one
+installed. Please go to its 'bin' directory. E.g.
+----
+$ cd plugins/com.st.stm32cube.ide.mcu.externaltools.stlink-gdb-server.linux64_2.0.200.202202231230/tools/bin
+----
+Now, you will need to edit provided 'config.txt' file inside the
+directory. Use your favorite editor. Open the file and scrolls
+down in it. You will see following comment:
+----
+###############################################################
+#  -cp <path>         : Path to STM32CubeProgrammer
+#                       Modify to correct path
+#                       for STM32_Programmer_CLI executable
+###############################################################
+-cp
+----
+and here you will need to place path where your STM32CubeProgrammer is
+installed directly behind the '-cp' parameter. E.g.
+----
+###############################################################
+#  -cp <path>         : Path to STM32CubeProgrammer
+#                       Modify to correct path
+#                       for STM32_Programmer_CLI executable
+###############################################################
+-cp /home/karel/sfw/stm32cubeide_1.8.0/plugins/com.st.stm32cube.ide.mcu.externaltools.cubeprogrammer.linux64_2.0.200.202202231230/tools/bin
+----
+Once you are done with it, you can save the file and close the
+editor. Let's verify that GDB server is configured and running well by starting
+it inside the shell. Please go inside the directory where
+ST-LINK_gdbserver.sh is located and run it by:
+----
+$ ./ST-LINK_gdbserver.sh 
+----
+
+If everything is all right and if you have board still connected to
+your host computer then you should see output like following:
+
+----
+$ ./ST-LINK_gdbserver.sh 
+
+STMicroelectronics ST-LINK GDB server. Version 6.1.0
+Copyright (c) 2022, STMicroelectronics. All rights reserved.
+
+Starting server with the following options:
+        Persistent Mode            : Enabled
+        LogFile Name               : debug.log
+        Logging Level              : 31
+        Listen Port Number         : 61234
+        Status Refresh Delay       : 15s
+        Verbose Mode               : Disabled
+        SWD Debug                  : Enabled
+
+COM frequency = 24000 kHz
+Target connection mode: Default
+Reading ROM table for AP 0 @0xe00fefd0
+Hardware watchpoint supported by the target 
+ST-LINK Firmware version : V3J9M3
+Device ID: 0x450
+PC: 0x8028fa4
+ST-LINK device status: HALT_MODE
+ST-LINK detects target voltage = 3.28 V
+ST-LINK device status: HALT_MODE
+ST-LINK device initialization OK
+Stm32Device, pollAndNotify running...
+SwvSrv state change: 0 -> 1
+Waiting for connection on port 61235...
+Waiting for debugger connection...
+Waiting for connection on port 61234...
+----
+If this is the case, then you can finish GDB server by hitting
+'Ctrl-C' key combination.
+
+==== Install RTEMS build requirements
+Please note that this paragraph is written for Ubuntu 20.04.x LTS and is
+not directly applicable to the Mac OS X or other Linux distributions
+except maybe Debian. Whole setup and both tool chain build and RTEMS BSP
+build was verified on fresh installation of Ubuntu 20.04.4 LTS
+Desktop. During the installation 'Minimal installation' was chosen to
+save installation time and disk space.
+
+Open the shell window and run following command inside it. You will
+need to hit 'Enter' key to confirm installation and then wait for
+packages download and installation.
+----
+$ sudo apt install git build-essential python3 python-is-python3 bison \
+    flex texinfo python3-dev
+----
+
+=== Obtain and build RTEMS tool chain
+
+The tool chain code is best obtained and built by using RTEMS source
+builder software package. It itself may be obtained from the RTEMS
+project git repository. For this demonstration let's create
+'workspace' directory inside the user home directory and build
+everything there.
+----
+$ cd
+$ mkdir workspace
+$ cd workspace
+$ git clone git://git.rtems.org/rtems-source-builder.git
+----
+By running the command block above, we have obtained source code of the RTEMS
+source builder software package. Let's check that every prerequisite
+for it 
+is installed well
+
+----
+$ cd rtems-source-builder
+$ ./source-builder/sb-check
+RTEMS Source Builder - Check, 6 (49e3dac17765)
+Environment is ok
+----
+
+If environment is ok, then we can proceed with building the tool
+chain. We will install it inside the workspace directory into
+'rtems-tools' subdirectory. This is done for the purpose of this demo,
+but you can choose other installation target as well. You will just
+need to adjust target path in '--prefix' parameter.
+
+IMPORTANT: Make sure you have at least 10 GB of free disk space
+on your host computer in order to proceed with building of RTEMS tool
+chain.
+----
+$ cd rtems
+$ ../source-builder/sb-set-builder --prefix=$HOME/workspace/rtems-tools 6/rtems-arm
+----
+This step will take same time as it'll need to download all the
+required source code and build it and the packages like GNU C compiler
+are not the smallest one. Let's stand by and follow the output printed
+to the terminal window. When the process is finished you may see
+output like:
+
+----
+installing: dtc-1.6.1-x86_64-linux-gnu-1 -> /home/rtems/workspace/rtems-tools
+installing: expat-2.1.0-x86_64-linux-gnu-1 -> /home/rtems/workspace/rtems-tools
+installing: gmp-6.1.0-x86_64-linux-gnu-1 -> /home/rtems/workspace/rtems-tools
+installing: arm-rtems6-gdb-11.2-x86_64-linux-gnu-1 -> /home/rtems/workspace/rtems-tools
+installing: arm-rtems6-binutils-2.38-x86_64-linux-gnu-1 -> /home/rtems/workspace/rtems-tools
+installing: arm-rtems6-gcc-0f001dd-newlib-64b2081-x86_64-linux-gnu-1 -> /home/rtems/workspace/rtems-tools
+installing: rtems-tools-3c0e4f74f16e840958c0b1a824cb1dfeba8491fa-1 -> /home/rtems/workspace/rtems-tools
+cleaning: dtc-1.6.1-x86_64-linux-gnu-1
+cleaning: expat-2.1.0-x86_64-linux-gnu-1
+cleaning: gmp-6.1.0-x86_64-linux-gnu-1
+cleaning: arm-rtems6-gdb-11.2-x86_64-linux-gnu-1
+cleaning: arm-rtems6-binutils-2.38-x86_64-linux-gnu-1
+cleaning: arm-rtems6-gcc-0f001dd-newlib-64b2081-x86_64-linux-gnu-1
+cleaning: rtems-tools-3c0e4f74f16e840958c0b1a824cb1dfeba8491fa-1
+Build Sizes: usage: 9.234GB total: 2.212GB (sources: 188.691MB, patches: 131.556KB, installed 2.028GB)
+Build Set: Time 0:39:23.572995
+----
+
+
+=== Obtain and build RTEMS BSP for STM32H747I-DISCO board
+Development of the RTEMS BSP for the STM32H747I-DISCO board is ongoing
+process and its current state is saved into the branch
+on github.com. Open the shell window and switch to 'workspace'
+directory we have created for RTEMS installation before. Use git
+command to obtain the work in progress RTEMS repository:
+----
+$ cd
+$ cd workspace
+$ git clone https://github.com/karelfv/rtems.git
+Cloning into 'rtems'...
+remote: Enumerating objects: 597836, done.
+remote: Counting objects: 100% (8145/8145), done.
+remote: Compressing objects: 100% (4267/4267), done.
+remote: Total 597836 (delta 4543), reused 5553 (delta 3630), pack-reused 589691
+Receiving objects: 100% (597836/597836), 113.36 MiB | 8.00 MiB/s, done.
+Resolving deltas: 100% (468783/468783), done.
+----
+
+Use following commands to switch to the branch which implements BSP:
+----
+$ cd rtems
+$ git checkout stm32h747i-disco-wip
+Branch 'stm32h747i-disco-wip' set up to track remote branch 'stm32h747i-disco-wip' from 'origin'.
+Switched to a new branch 'stm32h747i-disco-wip'
+----
+
+Generate default configuration for the board:
+
+----
+$ ./waf bsp_defaults --rtems-bsps=arm/stm32h747i-disco > stm32h747i-disco.ini
+Regenerate build specification cache (needs a couple of seconds)...
+----
+
+To run basic hello world or ticker samples you do not need to modify
+default BSP configuration here as the compilation of basic RTEMS demo samples is
+enabled by default. Let's continue with configuration of
+the RTEMS source by running:
+
+----
+$ ./waf configure --rtems-bsps=arm/stm32h747i-disco --rtems-config=./stm32h747i-disco.ini --rtems-tools=$HOME/workspace/rtems-tools
+Setting top to                           : /home/rtems/workspace/rtems 
+Setting out to                           : /home/rtems/workspace/rtems/build 
+Configure board support package (BSP)    : arm/stm32h747i-disco 
+Checking for program 'arm-rtems6-gcc'    : /home/rtems/workspace/rtems-tools/bin/arm-rtems6-gcc 
+Checking for program 'arm-rtems6-g++'    : /home/rtems/workspace/rtems-tools/bin/arm-rtems6-g++ 
+Checking for program 'arm-rtems6-ar'     : /home/rtems/workspace/rtems-tools/bin/arm-rtems6-ar 
+Checking for program 'arm-rtems6-ld'     : /home/rtems/workspace/rtems-tools/bin/arm-rtems6-ld 
+Checking for program 'ar'                : /home/rtems/workspace/rtems-tools/bin/arm-rtems6-ar 
+Checking for program 'g++, c++'          : /home/rtems/workspace/rtems-tools/bin/arm-rtems6-g++ 
+Checking for program 'ar'                : /home/rtems/workspace/rtems-tools/bin/arm-rtems6-ar 
+Checking for program 'gas, gcc'          : /home/rtems/workspace/rtems-tools/bin/arm-rtems6-gcc 
+Checking for program 'ar'                : /home/rtems/workspace/rtems-tools/bin/arm-rtems6-ar 
+Checking for program 'gcc, cc'           : /home/rtems/workspace/rtems-tools/bin/arm-rtems6-gcc 
+Checking for program 'ar'                : /home/rtems/workspace/rtems-tools/bin/arm-rtems6-ar 
+Checking for asm flags '-MMD'            : yes 
+Checking for c flags '-MMD'              : yes 
+Checking for cxx flags '-MMD'            : yes 
+'configure' finished successfully (0.454s)
+----
+Build the BSP including samples using 'build' command:
+----
+$ ./waf build
+----
+the command outputs a lot of information about files being compiled
+and ends with output like:
+----
+Waf: Leaving directory `/home/rtems/workspace/rtems/build/arm/stm32h747i-disco'
+'build_arm/stm32h747i-disco' finished successfully (12.086s)
+----
+
+
+=== Run BSP hello sample binary on the board
+Open 3 shell windows for the test on the host computer. Also make sure
+board is connected to the computer and is running. It does not matter
+if automatic cyclic demo is running there or if you navigated to some
+demo part and left it there. ST-Link GDB server always takes over the
+board when connected to it.
+
+Start GDB server in the first window by switching to GDB server
+directory and running the shell script. This is from testing machine
+installation, the path to GDB server may look different in your
+installation case.
+----
+$ cd
+$ cd sfw/stm32cubeide_1.8.0/plugins/com.st.stm32cube.ide.mcu.externaltools.stlink-gdb-server.linux64_2.0.200.202202231230/tools/bin
+$ ./ST-LINK_gdbserver.sh 
+
+
+STMicroelectronics ST-LINK GDB server. Version 6.1.0
+Copyright (c) 2022, STMicroelectronics. All rights reserved.
+
+Starting server with the following options:
+        Persistent Mode            : Enabled
+        LogFile Name               : debug.log
+        Logging Level              : 31
+        Listen Port Number         : 61234
+        Status Refresh Delay       : 15s
+        Verbose Mode               : Disabled
+        SWD Debug                  : Enabled
+
+COM frequency = 24000 kHz
+Target connection mode: Default
+Reading ROM table for AP 0 @0xe00fefd0
+Hardware watchpoint supported by the target 
+ST-LINK Firmware version : V3J9M3
+Device ID: 0x450
+PC: 0x8028fa4
+ST-LINK device status: HALT_MODE
+ST-LINK detects target voltage = 3.28 V
+ST-LINK device status: HALT_MODE
+ST-LINK device initialization OK
+Stm32Device, pollAndNotify running...
+SwvSrv state change: 0 -> 1
+Waiting for connection on port 61235...
+Waiting for debugger connection...
+Waiting for connection on port 61234...
+----
+
+In second shell window you will need to run your terminal program. On
+Ubuntu 20.04 the recommended way is to use minicom. Let's install it
+first by:
+
+----
+$ sudo apt install minicom
+----
+
+And run it with root privileges to be able to reach USB serial port
+provided by board:
+
+----
+$ sudo minicom -s
+----
+The minicom is invoked with configuration menu open. Go into the
+'Serial port setup' and hit 'a' key to select 'Serial Device'
+setup. Change '/dev/modem' from there into '/dev/ttyACM0' and hit
+'Enter' key. Hit 'f' key to change hardware flow control from 'Yes' to
+'No'. When you are done with it, you can hit 'Enter' key to finish
+this part of configuration and then scrolls in menu to 'Exit' and hit
+'Enter' key on it. The minicom will switch to terminal mode with just
+provided configuration.
+
+In the third shell window navigate into the BSP build directory and start
+RTEMS GDB with the hello.exe sample.
+
+----
+$ cd
+$ cd workspace/rtems
+$ ../rtems-tools/bin/arm-rtems6-gdb build/arm/stm32h747i-disco/testsuites/samples/hello.exe 
+GNU gdb (GDB) 10.1.90.20210409-git
+Copyright (C) 2021 Free Software Foundation, Inc.
+License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>
+This is free software: you are free to change and redistribute it.
+There is NO WARRANTY, to the extent permitted by law.
+Type "show copying" and "show warranty" for details.
+This GDB was configured as "--host=x86_64-linux-gnu --target=arm-rtems6".
+Type "show configuration" for configuration details.
+For bug reporting instructions, please see:
+<https://www.gnu.org/software/gdb/bugs/>.
+Find the GDB manual and other documentation resources online at:
+    <http://www.gnu.org/software/gdb/documentation/>.
+
+For help, type "help".
+Type "apropos word" to search for commands related to "word"...
+Reading symbols from build/arm/stm32h747i-disco/testsuites/samples/hello.exe...
+(gdb)
+----
+
+Now, you need to connect GDB with the ST's GDB server by:
+
+----
+(gdb) target extended-remote :61234
+Remote debugging using :61234
+0x08028fa4 in ?? ()
+(gdb) 
+----
+and finally you will need to load hello.exe binary into the board
+memory by:
+
+----
+(gdb) load
+Loading section .start, size 0x458 lma 0x24000000
+Loading section .text, size 0xfca8 lma 0x24000480
+Loading section .init, size 0xc lma 0x24010128
+Loading section .fini, size 0xfecc lma 0x24010134
+Loading section .rodata, size 0x1aab lma 0x24020000
+Loading section .ARM.exidx, size 0x8 lma 0x24021aac
+Loading section .eh_frame, size 0x4 lma 0x24021ab4
+Loading section .init_array, size 0x4 lma 0x24021ab8
+Loading section .fini_array, size 0x4 lma 0x24021abc
+Loading section .rtemsroset, size 0x540 lma 0x24021ac0
+Loading section .data, size 0x6a4 lma 0x24022000
+Start address 0x24000400, load size 140923
+Transfer rate: 684 KB/sec, 2562 bytes/write.
+(gdb)
+----
+If everything went fine, then you can run the RTEMS binary by using
+'cont' GDB command.
+
+----
+(gdb) cont
+Continuing.
+----
+Note that this command should never finish. To see the actual output
+from RTEMS switch to
+the second shell window with minicom running and you should see hello output
+there:
+
+----
+*** BEGIN OF TEST HELLO WORLD ***                                            
+*** TEST VERSION: 6.0.0.50ce036cfbd9807a54af47eb60eadb6a33a9e82d             
+*** TEST STATE: EXPECTED_PASS                                                
+*** TEST BUILD:                                                              
+*** TEST TOOLS: 10.3.1 20220224 (RTEMS 6, RSB 49e3dac17765fa82ce2f754da839638ee352f95c, Newlib 64b2081)
+Hello World                                                                  
+                                                                             
+*** END OF TEST HELLO WORLD ***                                              
+                                                                             
+                                                                             
+[ RTEMS shutdown ]                                                           
+RTEMS version: 6.0.0.50ce036cfbd9807a54af47eb60eadb6a33a9e82d
+RTEMS tools: 10.3.1 20220224 (RTEMS 6, RSB 49e3dac17765fa82ce2f754da839638ee352f95c, Newlib 64b2081)
+executing thread ID: 0x08a010001
+----
+
+Since default RTEMS BSP configuration resets the board after run
+immediately you can also see output from the immediately started ST
+demo:
+
+----
+STM32H747I-DISCO_MB1248: Out Of the Box Demonstration V1.0.1 (Build Aug 22 2019 at 11:56:22)
+STM32H747I-DISCO_MB1248: ST Menu Launcher V1.1.0
+CPU running at 400MHz, Peripherals at 100MHz/100Mz
+----
+which is not a problem here at all. Later we can reconfigure BSP to
+not reset board to prevent demo output here.
+
+=== Run RTEMS testsuite on the board
+
+Due to work in progress nature of the STM32H747I-DISCO support the
+current RTEMS tester framework is not ready to support the board
+out of the box. There are several steps which need to be done in order to
+support running the tester in close cooperation with the board.
+Note that you already have RTEMS tester framework installed
+as part of the RTEMS tool chain.
+
+.Quick introduction to RTEMS tester framework
+There is a huge documentation about the topic so description here is
+purely focused on STM32H7 family and its testing. For more general
+information about the topic 
+please see https://docs.rtems.org/branches/master/user/testing/index.html.
+Note that board specific configuration consist of board specific
+configuration file in the RTEMS tester itself and of user
+configuration file which describes user/system specific configuration
+details and is provided by the user. Tester supports running tests using various mechanism but
+here we solely rely on GDB which connects to ST-Link GDB
+server. Tester also supports looking into the output of the test by
+various means, but here we will need to use ser2net as the only
+supported way to look into the board serial output.
+When using ST-Link GDB server it needs to be remarked that it is very stable piece of software but testing shows
+that it sometimes is not able to survive running all RTEMS testsuite
+tests in test by test manner in one run. Sometimes it gets into strange state and
+stops responding and then tests fail. Solution to this issue is to
+start ST-Link GDB server process per every test run. The RTEMS tester provides
+functionality for it, but the functionality is somehow limited as it
+does not support starting background process. Due to this fact we need to use
+external script which based on notification from the tester will
+start and stop ST-Link GDB server as needed. The notification in our case is
+really simple and done by creating and deleting certain files on /tmp
+filesystem. This is a brute force poor man solution to workaround RTEMS
+tester limitations.
+
+.Rebuild to include more tests and not reset the board after test
+We will need to rebuild BSP with not resetting the board after every
+test since otherwise test output may get mangled by board demo output
+which would start immediately after every single test. Please edit BSP
+configuration file 'stm32h747i-disco.ini', scroll to the bottom of the
+file and change
+----
+BSP_RESET_BOARD_AT_EXIT = 1
+----
+to:
+
+----
+BSP_RESET_BOARD_AT_EXIT = 0
+----
+When we're going to rebuild BSP for testing it is also a good idea to
+compile more tests. Let's enable them by first enabling POSIX API and
+then by enabling all tests. Scroll up in the BSP configuration file
+and change:
+
+----
+RTEMS_POSIX_API = False
+----
+to:
+
+----
+RTEMS_POSIX_API = True
+----
+that is to enable POSIX API. Now scroll a bit down and change:
+----
+BUILD_TESTS = False
+----
+to:
+
+----
+BUILD_TESTS = True
+----
+that is to build every possible testcase for the board and
+configuration. Now, let's clean the build, reconfigure and rebuild
+again by:
+
+----
+$ rm -rf build/
+$ ./waf configure --rtems-bsps=arm/stm32h747i-disco --rtems-config=./stm32h747i-disco.ini --rtems-tools=$HOME/workspace/rtems-tools
+$ ./waf build
+----
+This way, the testsuite is ready to be run in RTEMS tester.
+
+.Ser2net installation
+
+RTEMS tester does not support hooking directly to the serial port or
+serial port over USB as presented on ST-Link board interface. We need
+to use 3rd part software known as 'ser2net' which basically bridges
+output from serial port to the TCP/IP network. On Ubuntu use following
+command to install it:
+----
+$ sudo apt install ser2net
+----
+IMPORTANT: Make sure you install ser2net only on dedicated testing or
+lab machine. It is not responsible to connect hardware serial port to
+potentially wild internet environment. Use firewall to protect the
+exported port!
+
+We need to configure ser2net to export ST-Link serial device
+on TCP/IP port 3033. You can do that by editing /etc/ser2net.conf file
+and adding following line to the bottom of the file.
+----
+3033:telnet:600:/dev/ttyACM0:115200 8DATABITS NONE 1STOPBIT banner
+----
+
+You can verify that ser2net is working well by telnet to localhost and
+3033 port and reruning hello sample again this time without running
+minicom terminal. You should see output in the telnet window. If this
+is working, you are done with this step.
+
+CAUTION: Cedric, ser2net paragraph above is a bit on the water as my lab machine is running
+Debian testing which provides more modern ser2net application with
+completely different configuration file format. Anyway, done in the
+best way as I am able to, hopefully this will work for you.
+
+.RTEMS Tester patching to support the board
+The RTEMS tester is missing board/connection configuration file. The
+file is prepared for you in the BSP directory you just need to copy it
+to appropriate place by following commands:
+----
+$ cd
+$ cd workspace/rtems
+$ cp stm32h7-stlink_ini ../rtems-tools/share/rtems/tester/rtems/testing/bsps/stm32h7-stlink.ini
+----
+
+.GDB Server manager installation
+The GDB Server manager is probably too noble name for the hackish
+script to start/stop ST-Link GDB server in our case. Anyway, it is
+already provided in the BSP directory with the name
+'stlink-gdbserver-mgr'. You will need to edit it and change
+'PLUGIN_DIR' environmental variable to point correctly to your
+installation of the STM32CubeIDE directory in which ST-LINK_gdbserver
+file is located. That is the directory which holds
+ST-Link GDB server and its configuration 'config.txt' file which you
+have already edited above. When you are done with this, you can test
+the manager script by running it in one shell window and from another
+shell window you can start and stop GDB server by creating files on
+/tmp file system like:
+----
+$ touch /tmp/stlink-start
+----
+this is to start the server and:
+----
+$ touch /tmp/stlink-stop
+----
+to stop the server.
+When testing watch the manager shell window as it shows precisely when
+the ST-Link GDB Server is started and when it exits.
+
+
+.RTEMS Tester user configuration
+The BSP RTEMS tester configuration requires user to supply
+configuration for console connection to the board/BSP and for pre test
+and post test commands which we like to run. The user configuration is
+also supplied in the BSP source directory in a file
+'stm32h7-stlink-user-config_ini'. The console configuration is set in
+a way to use 'ser2net' configuration, e.g. /dev/ttyACM0 exported on
+port 3033. So you do not need to touch this. However you will
+need to edit the file and
+modify 'target_pretest_command' and 'target_posttest_command'
+variables. Both should point to scripts in BSP source directory which
+are also provided. The scripts are 'stlink-gdbserver-start' for
+pretest command and 'stlink-gdbserver-stop' for posttest command. Both
+scripts are create appropriate file on the /tmp filesystem and then
+wait for the file deletion. The deletion is kind of notification
+from the ST-Link GDB server manager script that the required action, either start or
+stop, happened. Please modify the user configuration file and fix paths to
+both scripts there.
+
+
+.Verify RTEMS Tester configuration
+After modification of the user configuration it is a time to test
+RTEMS tester framework on one test to see if it is running as expected
+or there is some issue which needs to be solved. Single test run is
+performed by 'rtems-run' command and in our case run inside the BSP
+source directory like:
+
+----
+$ ../rtems-tools/bin/rtems-run --timeout=70 --rtems-bsp=stm32h7-stlink --rtems-tools=../rtems-tools --user-config=./stm32h7-stlink-user-config_ini build/arm/stm32h747i-disco/testsuites/samples/hello.exe
+----
+Still it is possible some demo output gets in, but hello world test
+case output should also be presented in the output of 'rtems-run'
+command. If this is the case, then RTEMS tester is configured
+correctly and ready for the next step.
+
+.Run the testsuite using RTEMS Tester
+Final step is to run all or subset of tests depending on chosen test
+directory. We need to use 'rtems-test' command for it and to run all
+testsuite samples for example we can use following command:
+----
+$ ../rtems-tools/bin/rtems-test --timeout=70 --rtems-bsp=stm32h7-stlink --rtems-tools=../rtems-tools --user-config=./stm32h7-stlink-user-config_ini build/arm/stm32h747i-disco/testsuites/samples/
+----
+The output of such command may looks like (due to more or less random
+nature of SIGTRAP in 0xa05f0000 issue):
+----
+Passed:        5
+Failed:        3
+User Input:    1
+Expected Fail: 0
+Indeterminate: 0
+Benchmark:     0
+Timeout:       0
+Test too long: 0
+Invalid:       0
+Wrong Version: 0
+Wrong Build:   0
+Wrong Tools:   0
+Wrong Header:  0
+________________
+Total:         9
+Failures:
+ cdtest.exe
+ ticker.exe
+ minimum.exe
+User Input:
+ capture.exe
+Average test time: 0:00:25.806113
+Testing time     : 0:03:52.255017
+----
+
+In case you would like to run different subset of the testsuite use
+different testsuite subdirectory. In case you would like to run whole
+testsuite, use just 'build/arm/stm32h747i-disco/testsuites/' directory
+as a source of the tests.
+
