@@ -1,20 +1,18 @@
 actions:
-- get-boolean: null
-- define-condition: null
+- get-integer: null
+- env-assign: null
 build-type: option
-default: true
+default: 0x8000000
 default-by-variant:
-- value: false
+- value: 0x8100000
   variants:
-  - arm/stm32h7b3i-dk
-  - arm/stm32h757i-eval
   - arm/stm32h757i-eval-m4
 enabled-by: true
-format: '{}'
+format: '{:#010x}'
 links: []
-name: STM32H7_CONSOLE_ENABLE_UART7
+name: STM32H7_MEMORY_FLASH_ORIGIN
 description: |
-  Enable UART7 device in console driver.
+  Origin address of the internal flash.
 type: build
 SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
 copyrights:
