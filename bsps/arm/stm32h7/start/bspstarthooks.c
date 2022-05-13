@@ -101,7 +101,7 @@ void bsp_start_hook_0(void)
     HAL_Init();
     SystemInit_ExtMemCtl();
   }
-
+#if defined(CORE_CM7)
   if ((SCB->CCR & SCB_CCR_IC_Msk) == 0) {
     SCB_EnableICache();
   }
@@ -109,14 +109,16 @@ void bsp_start_hook_0(void)
   if ((SCB->CCR & SCB_CCR_DC_Msk) == 0) {
     SCB_EnableDCache();
   }
-
   _ARMV7M_MPU_Setup(stm32h7_config_mpu_region, stm32h7_config_mpu_region_count);
+#endif
 }
 
 void bsp_start_hook_1(void)
 {
   bsp_start_copy_sections_compact();
+#if defined(CORE_CM7)
   SCB_CleanDCache();
   SCB_InvalidateICache();
+#endif
   bsp_start_clear_bss();
 }
