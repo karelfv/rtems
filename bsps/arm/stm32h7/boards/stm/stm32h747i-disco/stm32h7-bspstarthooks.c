@@ -36,9 +36,25 @@
 
 #include <string.h>
 
+#if defined(STM32H7_MEMORY_QUADSPI_SIZE) && STM32H7_MEMORY_QUADSPI_SIZE > 0
+#include <stm32h747i_discovery_qspi.h>
+BSP_QSPI_Init_t QSPinit;
+#endif
+
 void HAL_MspInit(void)
 {
   __HAL_RCC_SYSCFG_CLK_ENABLE();
+}
+
+void stm32h7_init_qspi(void)
+{
+#if defined(STM32H7_MEMORY_QUADSPI_SIZE) && STM32H7_MEMORY_QUADSPI_SIZE > 0
+    /* let's initialize Quad SPI memory here for memory mapped mode */
+    memset((void*)&(QSPI_Ctx[0]), 0, sizeof(QSPI_Ctx[0]));
+    memset((void*)&QSPinit, 0, sizeof(BSP_QSPI_Init_t));
+    BSP_QSPI_Init(0, &QSPinit);
+    BSP_QSPI_EnableMemoryMappedMode(0);
+#endif
 }
 
 void bsp_start_hook_0(void)
@@ -57,6 +73,7 @@ void bsp_start_hook_0(void)
     HAL_RCC_MCOConfig(RCC_MCO1, RCC_MCO1SOURCE_HSI, RCC_MCODIV_1);
     HAL_Init();
     SystemInit_ExtMemCtl();
+    stm32h7_init_qspi();
   }
 #if defined(CORE_CM7)
   if ((SCB->CCR & SCB_CCR_IC_Msk) == 0) {
