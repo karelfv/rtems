@@ -36,12 +36,7 @@
 
 #include <string.h>
 
-void HAL_MspInit(void)
-{
-  __HAL_RCC_SYSCFG_CLK_ENABLE();
-}
-
-static void init_power(void)
+void stm32h7_init_power(void)
 {
   HAL_PWREx_ConfigSupply(STM32H7_PWR_SUPPLY);
   __HAL_PWR_VOLTAGESCALING_CONFIG(stm32h7_config_pwr_regulator_voltagescaling);
@@ -51,7 +46,7 @@ static void init_power(void)
   }
 }
 
-static void init_oscillator(void)
+void stm32h7_init_oscillator(void)
 {
   HAL_StatusTypeDef status;
 
@@ -61,7 +56,7 @@ static void init_oscillator(void)
   }
 }
 
-static void init_clocks(void)
+void stm32h7_init_clocks(void)
 {
   HAL_StatusTypeDef status;
 
@@ -74,7 +69,7 @@ static void init_clocks(void)
   }
 }
 
-static void init_peripheral_clocks(void)
+void stm32h7_init_peripheral_clocks(void)
 {
   HAL_StatusTypeDef status;
 
@@ -101,7 +96,7 @@ void bsp_start_hook_0(void)
     HAL_Init();
     SystemInit_ExtMemCtl();
   }
-#if defined(CORE_CM7)
+
   if ((SCB->CCR & SCB_CCR_IC_Msk) == 0) {
     SCB_EnableICache();
   }
@@ -109,16 +104,14 @@ void bsp_start_hook_0(void)
   if ((SCB->CCR & SCB_CCR_DC_Msk) == 0) {
     SCB_EnableDCache();
   }
+
   _ARMV7M_MPU_Setup(stm32h7_config_mpu_region, stm32h7_config_mpu_region_count);
-#endif
 }
 
 void bsp_start_hook_1(void)
 {
   bsp_start_copy_sections_compact();
-#if defined(CORE_CM7)
   SCB_CleanDCache();
   SCB_InvalidateICache();
-#endif
   bsp_start_clear_bss();
 }
