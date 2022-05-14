@@ -1,6 +1,7 @@
 actions:
 - get-integer: null
 - env-assign: null
+- define-unquoted: null
 build-type: option
 default: 0
 default-by-variant: []
