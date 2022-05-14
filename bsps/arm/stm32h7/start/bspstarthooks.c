@@ -79,39 +79,3 @@ void stm32h7_init_peripheral_clocks(void)
   }
 }
 
-void bsp_start_hook_0(void)
-{
-  if ((RCC->AHB3ENR & RCC_AHB3ENR_FMCEN) == 0) {
-    /*
-     * Only perform the low-level initialization if necessary.  An initialized
-     * FMC indicates that a boot loader already performed the low-level
-     * initialization.
-     */
-    SystemInit();
-    init_power();
-    init_oscillator();
-    init_clocks();
-    init_peripheral_clocks();
-    HAL_RCC_MCOConfig(RCC_MCO1, RCC_MCO1SOURCE_HSI, RCC_MCODIV_1);
-    HAL_Init();
-    SystemInit_ExtMemCtl();
-  }
-
-  if ((SCB->CCR & SCB_CCR_IC_Msk) == 0) {
-    SCB_EnableICache();
-  }
-
-  if ((SCB->CCR & SCB_CCR_DC_Msk) == 0) {
-    SCB_EnableDCache();
-  }
-
-  _ARMV7M_MPU_Setup(stm32h7_config_mpu_region, stm32h7_config_mpu_region_count);
-}
-
-void bsp_start_hook_1(void)
-{
-  bsp_start_copy_sections_compact();
-  SCB_CleanDCache();
-  SCB_InvalidateICache();
-  bsp_start_clear_bss();
-}
