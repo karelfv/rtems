@@ -4,6 +4,7 @@
 [submodule "hals/arm/stm32h7/stm32h7xx_hal_driver"]
 	path = hals/arm/stm32h7/stm32h7xx_hal_driver
 	url = https://github.com/karelfv/stm32h7xx_hal_driver.git
+	branch = rtems-6-2023-07-14
 [submodule "hals/arm/stm32h7/cmsis_device_h7"]
 	path = hals/arm/stm32h7/cmsis_device_h7
 	url = https://github.com/karelfv/cmsis_device_h7.git
