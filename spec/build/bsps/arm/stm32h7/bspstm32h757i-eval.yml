@@ -10,6 +10,9 @@ enabled-by: true
 family: stm32h7
 includes:
 - bsps/arm/stm32h7/boards/stm/stm32h757i-eval
+- hals/arm/stm32h7/CMSIS_5/CMSIS/Core/Include
+- hals/arm/stm32h7/cmsis_device_h7/Include
+- hals/arm/stm32h7/stm32h7xx_hal_driver/Inc
 install: []
 links:
 - role: build-dependency
