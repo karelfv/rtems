@@ -8,3 +8,4 @@
 [submodule "hals/arm/stm32h7/cmsis_device_h7"]
 	path = hals/arm/stm32h7/cmsis_device_h7
 	url = https://github.com/karelfv/cmsis_device_h7.git
+	branch = rtems-6-2023-07-14
