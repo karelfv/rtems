@@ -21,6 +21,8 @@ manifest:
   remotes:
     - name: upstream
       url-base: https://github.com/karelfv/
+    - name: arm
+      url-base: https://github.com/ARM-software/
 
   #
   # Please add items below based on alphabetical order
@@ -30,6 +32,18 @@ manifest:
       path: modules/hal/stm32h7
       groups:
         - hal
+    - name: cmsis_device_h7
+      revision: fe2eb751dde3c0921195b61a729537e32bcd6bc1
+      path: modules/hal/stm32h7
+      groups:
+        - hal
+    - name: CMSIS_5
+      remote: arm
+      revision: a75f01746df18bb5b929dfb8dc6c9407fac3a0f3
+      path: modules/hal/stm32h7
+      groups:
+        - hal
+
 
   self:
     path: rtems
