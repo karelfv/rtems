@@ -27,7 +27,7 @@ manifest:
   projects:
     - name: stm32h7xx_hal_driver
       revision: 5aa0254ab8fa9f555767008025e34204fe4512d9
-      path: rtems/modules/hal/stm32h7
+      path: modules/hal/stm32h7
       groups:
         - hal
 
