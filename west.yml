@@ -1,0 +1,51 @@
+# The west manifest file for upstream Zephyr.
+#
+# The per-installation west configuration file, .west/config, sets the
+# path to the project containing this file in the [manifest] section's
+# "path" variable.
+#
+# You are free to create your own manifest files and put them in any
+# repository you want, to create your own custom Zephyr installations.
+# For example, you could create a manifest file in your own out of
+# tree application directory, which would pull this zephyr repository
+# in as an ordinary project.
+#
+# You can pass your manifest repositories to west init when creating a
+# new Zephyr installation. See the west documentation for more
+# information.
+
+manifest:
+  defaults:
+    remote: upstream
+
+  remotes:
+    - name: upstream
+      url-base: https://github.com/karelfv/
+    - name: arm
+      url-base: https://github.com/ARM-software/
+
+  #
+  # Please add items below based on alphabetical order
+  projects:
+    - name: stm32h7xx_hal_driver
+      revision: 5aa0254ab8fa9f555767008025e34204fe4512d9
+      path: modules/hal/stm32h7/stm32h7xx_hal_driver
+      groups:
+        - hal
+    - name: cmsis_device_h7
+      revision: fe2eb751dde3c0921195b61a729537e32bcd6bc1
+      path: modules/hal/stm32h7/cmsis_device_h7
+      groups:
+        - hal
+    - name: CMSIS_5
+      remote: arm
+      revision: a75f01746df18bb5b929dfb8dc6c9407fac3a0f3
+      path: modules/hal/stm32h7/CMSIS_5
+      groups:
+        - hal
+
+
+  self:
+    path: rtems
+    #    west-commands: scripts/west-commands.yml
+    #    import: submanifests
