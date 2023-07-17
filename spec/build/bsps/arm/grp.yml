@@ -10,12 +10,12 @@ includes: []
 install:
 - destination: ${BSP_INCLUDEDIR}
   source:
-  - bsps/arm/include/cmsis_gcc.h
-  - bsps/arm/include/core_cm7.h
-  - bsps/arm/include/core_cm4.h
-  - bsps/arm/include/core_cmFunc.h
-  - bsps/arm/include/core_cmInstr.h
-  - bsps/arm/include/core_cmSimd.h
+  - hals/arm/stm32h7/CMSIS_5/CMSIS/Core/Include/cachel1_armv7.h
+  - hals/arm/stm32h7/CMSIS_5/CMSIS/Core/Include/cmsis_gcc.h
+  - hals/arm/stm32h7/CMSIS_5/CMSIS/Core/Include/cmsis_version.h
+  - hals/arm/stm32h7/CMSIS_5/CMSIS/Core/Include/core_cm7.h
+  - hals/arm/stm32h7/CMSIS_5/CMSIS/Core/Include/core_cm4.h
+  - hals/arm/stm32h7/CMSIS_5/CMSIS/Core/Include/mpu_armv7.h
   - bsps/arm/include/uart.h
 - destination: ${BSP_INCLUDEDIR}/bsp
   source:
