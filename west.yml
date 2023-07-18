@@ -28,7 +28,7 @@ manifest:
   # Please add items below based on alphabetical order
   projects:
     - name: stm32h7xx_hal_driver
-      revision: 5aa0254ab8fa9f555767008025e34204fe4512d9
+      revision: rtems-6-2023-07-14
       path: modules/hal/stm32h7/stm32h7xx_hal_driver
       groups:
         - hal
