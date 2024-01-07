@@ -21,9 +21,13 @@ links:
 - role: build-dependency
   uid: obj
 - role: build-dependency
+  uid: optappstack
+- role: build-dependency
   uid: ../../objmem
 - role: build-dependency
   uid: optenmpualign
+- role: build-dependency
+  uid: optenmpualignmerge
 - role: build-dependency
   uid: ../optmpuctrl
 - role: build-dependency
@@ -93,6 +97,14 @@ links:
 - role: build-dependency
   uid: optbootcore
 - role: build-dependency
+  uid: optenprimarybsp
+- role: build-dependency
+  uid: optenprimarybspnotifysecbsp
+- role: build-dependency
+  uid: optensecondarybsp
+- role: build-dependency
+  uid: optboothsemid
+- role: build-dependency
   uid: optusart1gpiopins
 - role: build-dependency
   uid: optusart1gpioregs
@@ -138,6 +150,10 @@ links:
   uid: linkcmdssramsdram
 - role: build-dependency
   uid: linkcmdsflashsdram
+- role: build-dependency
+  uid: linkcmdsflashsram12
+- role: build-dependency
+  uid: linkcmdsflashsram2
 - role: build-dependency
   uid: ../../bspopts
 type: build

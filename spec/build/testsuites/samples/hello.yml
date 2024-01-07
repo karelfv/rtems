@@ -12,7 +12,8 @@ ldflags: []
 links: []
 source:
 - testsuites/samples/hello/init.c
-stlib: []
+stlib:
+- m
 target: testsuites/samples/hello.exe
 type: build
 use-after: []

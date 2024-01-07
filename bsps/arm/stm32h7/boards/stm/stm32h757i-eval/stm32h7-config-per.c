@@ -34,6 +34,7 @@
 const RCC_PeriphCLKInitTypeDef stm32h7_config_peripheral_clocks = {
   /* for stm32h757-eval BSP we provide only minimalistic peripheral
      configuration just to make available U(S)ART working */
-  .PeriphClockSelection = RCC_PERIPHCLK_USART1,
-  .Usart16ClockSelection = RCC_USART16CLKSOURCE_D2PCLK2
+  .PeriphClockSelection = RCC_PERIPHCLK_USART1 | RCC_PERIPHCLK_RNG,
+  .Usart16ClockSelection = RCC_USART16CLKSOURCE_D2PCLK2,
+  .RngClockSelection = RCC_RNGCLKSOURCE_HSI48
 };

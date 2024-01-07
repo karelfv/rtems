@@ -64,6 +64,7 @@ void stm32h7_init_clocks(void);
 void stm32h7_init_peripheral_clocks(void);
 void stm32h7_init_qspi(void);
 
+void stm32h7_notify_secondary_bsp(void);
 /** @} */
 
 #ifdef __cplusplus

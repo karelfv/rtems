@@ -210,7 +210,7 @@ void SystemInit (void)
      detectable by the CPU after a WFI/WFE instruction.*/ 
  SCB->SCR |= SCB_SCR_SEVONPEND_Msk;
 
-#ifdef CORE_CM7 
+#if defined(CORE_CM7) || (defined (__rtems__) && defined(STM32H7_ENABLE_PRIMARY_BOOT_BSP))
   /* Reset the RCC clock configuration to the default reset state ------------*/
   /* Set HSION bit */
   RCC->CR |= RCC_CR_HSION;
@@ -446,6 +446,8 @@ void SystemCoreClockUpdate (void)
   */
 void SystemInit_ExtMemCtl(void)
 {
+  #define  FMC_BMAP_Value    0x02000000    /* FMC Bank Mapping 2 (SDRAM Bank2 remapped) */
+
   __IO uint32_t tmp = 0;
   
 #if defined (DATA_IN_ExtSDRAM) && defined (DATA_IN_ExtSRAM)
@@ -604,7 +606,10 @@ void SystemInit_ExtMemCtl(void)
   tmpreg = FMC_Bank5_6_R->SDCR[1]; 
   FMC_Bank5_6_R->SDCR[1] = (tmpreg & 0xFFFFFDFF);
 
-   /*FMC controller Enable*/
+  /* Configure FMC Bank Mapping */
+  FMC_Bank1_R->BTCR[0] |= FMC_BMAP_Value;
+
+  /*FMC controller Enable*/
   FMC_Bank1_R->BTCR[0]  |= 0x80000000;
   
 #elif defined (DATA_IN_ExtSDRAM)
@@ -755,6 +760,9 @@ void SystemInit_ExtMemCtl(void)
   tmpreg = FMC_Bank5_6_R->SDCR[1]; 
   FMC_Bank5_6_R->SDCR[1] = (tmpreg & 0xFFFFFDFF);
 
+  /* Configure FMC Bank Mapping */
+  FMC_Bank1_R->BTCR[0] |= FMC_BMAP_Value;
+
    /*FMC controller Enable*/
   FMC_Bank1_R->BTCR[0]  |= 0x80000000;
 
@@ -820,6 +828,9 @@ void SystemInit_ExtMemCtl(void)
   FMC_Bank1_R->BTCR[5]  = 0x00110212;
   FMC_Bank1E_R->BWTR[4] = 0x0FFFFFFF;  
   
+  /* Configure FMC Bank Mapping */
+  FMC_Bank1_R->BTCR[0] |= FMC_BMAP_Value;
+
   /*FMC controller Enable*/
   FMC_Bank1_R->BTCR[0]  |= 0x80000000;  
 

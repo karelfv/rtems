@@ -1,0 +1,21 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+actions:
+- get-boolean: null
+- env-assign: null
+- define-condition: null
+build-type: option
+copyrights:
+- Copyright (C) 2023 Karel Gardas
+default:
+- enabled-by: true
+  value: false
+description: |
+  Mark this BSP as a secondary boot BSP. This means that BSP will block its boot
+  and will wait for notification from the primary boot BSP. The secondary boot
+  BSP neither initializes hardware as this is a task of primary boot BSP.
+  Recommended practice is to put primary BSP on CM7 and secondary BSP on CM4.
+enabled-by: true
+format: '{}'
+links: []
+name: STM32H7_ENABLE_SECONDARY_BOOT_BSP
+type: build

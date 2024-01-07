@@ -1,0 +1,27 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+actions:
+- get-string: null
+- script: |
+    variants = ["DTCM", "AXI", "DEFAULT"]
+    if value not in variants:
+       conf.fatal("Application stack location value '{}' is not one of {}".format(value, variants))
+    conf.define_cond("STM32H7_APP_STACK_IN_" + value, True)
+build-type: option
+copyrights:
+- Copyright (C) 2023 Karel Gardas <karel@functional.vision>
+default:
+- enabled-by:
+  - arm/precidata-sl-3011
+  value: AXI
+- enabled-by: true
+  value: DEFAULT
+description: |
+  Select the application stack locality. Possible values are DTCM, AXI or DEFAULT. DEFAULT means
+  usual location of the application stack which is currently Workspace. When setting different than
+  DEFAULT value here, make sure that your chosen location does not conflict with placement
+  of any other section of RTEMS application.
+enabled-by: true
+format: '{}'
+links: []
+name: STM32H7_APP_STACK_LOCATION
+type: build

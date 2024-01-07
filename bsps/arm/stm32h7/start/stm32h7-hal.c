@@ -90,6 +90,8 @@ stm32h7_module_index stm32h7_get_module_index(const void *regs)
     case SDMMC2_BASE:
     case DLYB_SDMMC2_BASE:
       return STM32H7_MODULE_SDMMC2;
+    case HSEM_BASE:
+      return STM32H7_MODULE_HSEM;
   }
 
   return STM32H7_MODULE_INVALID;
@@ -151,6 +153,7 @@ static const stm32h7_clk_info stm32h7_clk[] = {
 #endif
   [STM32H7_MODULE_SDMMC1] = { &RCC->AHB3ENR, RCC_AHB3ENR_SDMMC1EN },
   [STM32H7_MODULE_SDMMC2] = { &RCC->AHB2ENR, RCC_AHB2ENR_SDMMC2EN },
+  [STM32H7_MODULE_HSEM] = { &RCC->AHB4ENR, RCC_AHB4ENR_HSEMEN }
 };
 
 void stm32h7_clk_enable(stm32h7_module_index index)
@@ -234,6 +237,7 @@ static const stm32h7_clk_info stm32h7_clk_low_power[] = {
 #endif
   [STM32H7_MODULE_SDMMC1] = { &RCC->AHB3LPENR, RCC_AHB3LPENR_SDMMC1LPEN },
   [STM32H7_MODULE_SDMMC2] = { &RCC->AHB2LPENR, RCC_AHB2LPENR_SDMMC2LPEN },
+  [STM32H7_MODULE_HSEM] = { &RCC->AHB4ENR, RCC_AHB4ENR_HSEMEN }
 };
 
 void stm32h7_clk_low_power_enable(stm32h7_module_index index)

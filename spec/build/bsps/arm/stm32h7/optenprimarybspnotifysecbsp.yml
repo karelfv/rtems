@@ -1,0 +1,21 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+actions:
+- get-boolean: null
+- env-assign: null
+- define-condition: null
+build-type: option
+copyrights:
+- Copyright (C) 2023 Karel Gardas
+default:
+- enabled-by: true
+  value: true
+description: |
+  Tell primary boot BSP to notify secondary boot BSP about successful
+  finish of initialization process. If you disable it here, then
+  you will need to invoke stm32h7_notify_secondary_bsp() function
+  from your RTEMS app code in order to make secondary boot BSP booting.
+enabled-by: true
+format: '{}'
+links: []
+name: STM32H7_PRIMARY_BOOT_BSP_NOTIFY_SECONDARY_BSP
+type: build

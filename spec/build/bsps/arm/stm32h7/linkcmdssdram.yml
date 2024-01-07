@@ -33,6 +33,11 @@ do-configure: |
   bsp_align_text_and_rodata_end_to_power_of_2 = 1;
   """
 
+  if conf.env.STM32H7_ENABLE_MPU_ALIGNMENT_MERGE:
+      content += """
+  bsp_align_merged_text_and_rodata_end_to_power_of_2 = 1;
+  """
+
   content += """
   INCLUDE linkcmds.armv7m
   """

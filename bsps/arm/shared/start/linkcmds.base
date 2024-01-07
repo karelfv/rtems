@@ -362,6 +362,20 @@ SECTIONS {
 	} > REGION_STACK AT > REGION_STACK
 	bsp_section_stack_size = bsp_section_stack_end - bsp_section_stack_begin;
 
+       /*
+        * sections for fake FW RTEMS-based implementation starts here
+        */
+	.sram4section 0x38000000 : {
+		KEEP(*(.sram4))
+	} > SRAM_4
+
+	.itcmsection 0x00000100 : {
+		KEEP(*(.itcm))
+	} > ITCM
+       /*
+        * sections for fake FW RTEMS-based implementation ends here
+        */
+
 	.nocache : ALIGN_WITH_INPUT {
 		bsp_section_nocache_begin = .;
 		*(SORT_BY_ALIGNMENT (SORT_BY_NAME (.bsp_nocache*)))

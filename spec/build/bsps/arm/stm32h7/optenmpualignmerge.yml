@@ -1,0 +1,25 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+actions:
+- get-boolean: null
+- env-assign: null
+- define-condition: null
+build-type: option
+copyrights:
+- Copyright (C) 2020 embedded brains GmbH (http://www.embedded-brains.de)
+default:
+- enabled-by:
+  - arm/precidata-sl-3011
+  value: true
+- enabled-by: true
+  value: false
+description: |
+  Enable the alignment of the size of the combined start, text and
+  the rodata section to meet MPU region alignment requirements. This increases
+  the memory footprint. It enables a write-protection of the start, text, and
+  rodata sections and it also makes those sections executable.
+  The option is mutually exclusive with STM32H7_ENABLE_MPU_ALIGNMENT option.
+enabled-by: true
+format: '{}'
+links: []
+name: STM32H7_ENABLE_MPU_ALIGNMENT_MERGE
+type: build
